@@ -32,9 +32,7 @@ if DEBUG:
     ALLOWED_HOSTS = []
 else:
     ALLOWED_HOSTS = [
-        '.vercel.app',
-        '.ridwaanhall.me',
-        '.ridwaanhall.com',
+        'ml-stats.triptasoft.com',
     ]
 
 
