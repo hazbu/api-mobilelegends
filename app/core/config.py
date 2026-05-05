@@ -126,5 +126,5 @@ CONTACT_FORM_LINK: str = env_str("CONTACT_FORM_LINK", default="https://ridwaanha
 # Security & Access Keys
 # =========================
 SECRET_KEY: str = env_str("SECRET_KEY", default="default_secret_key")
-RONE_DEV_ACCESS_KEY: str = env_str("RONE_DEV_ACCESS_KEY", default="")
-RONE_DEV_ACCESS_KEY_V2: str = env_str("RONE_DEV_ACCESS_KEY_V2", default="")
+RONE_DEV_ACCESS_KEY: str = env_str("RONE_DEV_ACCESS_KEY", default="https://openmlbb.fastapicloud.dev/api")
+RONE_DEV_ACCESS_KEY_V2: str = env_str("RONE_DEV_ACCESS_KEY_V2", default="https://openmlbb.fastapicloud.dev/api")

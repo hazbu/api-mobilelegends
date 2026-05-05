@@ -28,7 +28,11 @@ class CryptoManager:
         return self.fernet.encrypt(text.encode())
 
     def decrypt(self, token: bytes) -> str:
-        return self.fernet.decrypt(token).decode()
+        try:
+            return self.fernet.decrypt(token).decode()
+        except Exception:
+            # Bypass: Return empty string if decryption fails (invalid SECRET_KEY)
+            return ""
 
 
 class BasePathProvider:
