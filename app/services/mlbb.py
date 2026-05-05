@@ -90,10 +90,41 @@ def fetch_mlbb_post(endpoint_id: str, payload: dict[str, Any], lang: str) -> Any
                 "size": payload.get("pageSize", 20),
                 "index": payload.get("pageIndex", 1),
             })
-            # Handle rank filters
+            
+            # Handle rank, sort, role, and lane unmapping
+            # The upstream API expects 'all' not '101', 'win_rate' not 'main_hero_win_rate', etc.
+            rank_reverse = {"101": "all", "5": "epic", "6": "legend", "7": "mythic", "8": "honor", "9": "glory"}
+            sort_reverse = {
+                "main_hero_appearance_rate": "pick_rate",
+                "main_hero_ban_rate": "ban_rate",
+                "main_hero_win_rate": "win_rate"
+            }
+            role_reverse = {1: "tank", 2: "fighter", 3: "assassin", 4: "mage", 5: "marksman", 6: "support"}
+            lane_reverse = {1: "exp", 2: "mid", 3: "roam", 4: "jungle", 5: "gold"}
+
             for f in payload.get("filters", []):
-                if f.get("field") == "bigrank":
-                    params["rank"] = f.get("value")
+                field = f.get("field", "")
+                value = f.get("value")
+                
+                if field == "bigrank":
+                    params["rank"] = rank_reverse.get(str(value), value)
+                elif "sortid" in field:
+                    # Role filter
+                    if isinstance(value, list):
+                        params["role"] = [role_reverse.get(v, v) for v in value]
+                    else:
+                        params["role"] = role_reverse.get(value, value)
+                elif "roadsort" in field:
+                    # Lane filter
+                    if isinstance(value, list):
+                        params["lane"] = [lane_reverse.get(v, v) for v in value]
+                    else:
+                        params["lane"] = lane_reverse.get(value, value)
+            
+            for s in payload.get("sorts", []):
+                if s.get("data", {}).get("field"):
+                    params["sort_field"] = sort_reverse.get(s["data"]["field"], s["data"]["field"])
+                    params["sort_order"] = s["data"].get("order", "desc")
                     
         return request_json(method=method, url=url, payload=payload if not is_get else None, params=params, headers=MLBBHeaderBuilder.get_academy_mlbb_header(lang, client_ip=get_bound_client_ip()))
 
