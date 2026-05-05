@@ -63,7 +63,7 @@ def resolve_hero_id(hero_identifier: str, lang: str) -> int:
 
 
 def fetch_mlbb_post(endpoint_id: str, payload: dict[str, Any], lang: str) -> Any:
-    # Mapping table for internal IDs to public endpoints
+    # Mapping table for internal MLBB IDs to public endpoints
     mapping = {
         "2756564": "heroes/positions",
         "2756567": "heroes/rank",
@@ -73,23 +73,31 @@ def fetch_mlbb_post(endpoint_id: str, payload: dict[str, Any], lang: str) -> Any
         "2756570": "heroes/rank",
     }
     
-    path = mapping.get(endpoint_id, f"heroes/{endpoint_id}")
-    url = f"https://openmlbb.fastapicloud.dev/api/{path}"
+    base_path = BasePathProvider.get_base_path()
     
-    # Map back to GET if it's a known public GET endpoint
-    method = "GET" if endpoint_id in ["2756564", "2756567", "2756568", "2756569", "2756565", "2756570"] else "POST"
-    
-    # Adjust params for GET
-    params = {"lang": lang}
-    if method == "GET":
-        params.update({
-            "size": payload.get("pageSize", 20),
-            "index": payload.get("pageIndex", 1),
-        })
-        # Handle rank filters
-        for f in payload.get("filters", []):
-            if f.get("field") == "bigrank":
-                params["rank"] = f.get("value")
+    if base_path.startswith("http"):
+        # Bypass mode (full URL fallback)
+        path = mapping.get(endpoint_id, f"heroes/{endpoint_id}")
+        url = f"{base_path}/{path}"
+        
+        # Determine method and params
+        is_get = endpoint_id in ["2756564", "2756567", "2756568", "2756569", "2756565", "2756570"]
+        method = "GET" if is_get else "POST"
+        
+        params = {"lang": lang}
+        if is_get:
+            params.update({
+                "size": payload.get("pageSize", 20),
+                "index": payload.get("pageIndex", 1),
+            })
+            # Handle rank filters
+            for f in payload.get("filters", []):
+                if f.get("field") == "bigrank":
+                    params["rank"] = f.get("value")
+                    
+        return request_json(method=method, url=url, payload=payload if not is_get else None, params=params, headers=MLBBHeaderBuilder.get_academy_mlbb_header(lang, client_ip=get_bound_client_ip()))
 
+    # Original mode
+    url = f"{RONE_DEV_ACCESS_KEY}{base_path}/{endpoint_id}"
     headers = MLBBHeaderBuilder.get_academy_mlbb_header(lang, client_ip=get_bound_client_ip())
-    return request_json(method=method, url=url, payload=payload if method=="POST" else None, params=params, headers=headers)
+    return request_json(method="POST", url=url, payload=payload, headers=headers)

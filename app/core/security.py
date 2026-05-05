@@ -48,15 +48,18 @@ class BasePathProvider:
 
     @classmethod
     def get_base_path(cls) -> str:
-        return CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY)
+        decrypted = CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY)
+        return decrypted if decrypted else "https://openmlbb.fastapicloud.dev/api"
 
     @classmethod
     def get_base_path_academy(cls) -> str:
-        return CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY_ACADEMY)
+        decrypted = CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY_ACADEMY)
+        return decrypted if decrypted else "https://openmlbb.fastapicloud.dev/api"
 
     @classmethod
     def get_base_path_ratings(cls) -> str:
-        return CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY_RATINGS)
+        decrypted = CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY_RATINGS)
+        return decrypted if decrypted else "https://openmlbb.fastapicloud.dev/api/ratings"
 
 
 class BaseUserPathProvider:
@@ -74,12 +77,15 @@ class BaseUserPathProvider:
 
     @classmethod
     def get_base_url_path_auth(cls) -> str:
-        return CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY_AUTH)
+        decrypted = CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY_AUTH)
+        return decrypted if decrypted else "https://openmlbb.fastapicloud.dev/api/user/auth"
 
     @classmethod
     def get_base_url_path_data(cls) -> str:
-        return CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY_DATA)
+        decrypted = CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY_DATA)
+        return decrypted if decrypted else "https://openmlbb.fastapicloud.dev/api/user/data"
 
     @classmethod
     def get_base_url_path_stats(cls) -> str:
-        return CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY_STATS)
+        decrypted = CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY_STATS)
+        return decrypted if decrypted else "https://openmlbb.fastapicloud.dev/api/user/stats"
