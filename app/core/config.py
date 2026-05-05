@@ -52,7 +52,7 @@ DEBUG: bool = env_bool("DEBUG", default=False)
 # Availability Settings
 # =========================
 PROJECT_VERSION: str = env_str("PROJECT_VERSION", default="4.0.8")
-IS_AVAILABLE: bool = env_bool("IS_AVAILABLE", default=False)
+IS_AVAILABLE: bool = env_bool("IS_AVAILABLE", default=True)
 DATE_AVAILABLE: str = env_str("DATE_AVAILABLE", default="May 15, 2026")
 ALTERNATIVE_ENDPOINT_URL: str = env_str(
     "ALTERNATIVE_ENDPOINT_URL",
@@ -125,6 +125,6 @@ CONTACT_FORM_LINK: str = env_str("CONTACT_FORM_LINK", default="https://ridwaanha
 # =========================
 # Security & Access Keys
 # =========================
-SECRET_KEY: str = env_str("SECRET_KEY")
-RONE_DEV_ACCESS_KEY: str = env_str("RONE_DEV_ACCESS_KEY")
-RONE_DEV_ACCESS_KEY_V2: str = env_str("RONE_DEV_ACCESS_KEY_V2")
+SECRET_KEY: str = env_str("SECRET_KEY", default="default_secret_key")
+RONE_DEV_ACCESS_KEY: str = env_str("RONE_DEV_ACCESS_KEY", default="")
+RONE_DEV_ACCESS_KEY_V2: str = env_str("RONE_DEV_ACCESS_KEY_V2", default="")
