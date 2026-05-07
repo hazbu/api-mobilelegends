@@ -18,6 +18,8 @@ def fetch_academy_post(endpoint_id: str, payload: dict[str, Any], lang: str) -> 
         "2713995": "academy/equipment/expanded",
         "2718122": "academy/spells",
         "2740638": "academy/emblems",
+        "2718121": "academy/emblems",
+        "3210596": "academy/ranks",
     }
     
     base_path = BasePathProvider.get_base_path_academy()
@@ -25,6 +27,19 @@ def fetch_academy_post(endpoint_id: str, payload: dict[str, Any], lang: str) -> 
     if base_path.startswith("http"):
         # We are in bypass mode (using public URL)
         path = mapping.get(endpoint_id, f"academy/{endpoint_id}")
+        
+        # Differentiate overloaded ID 2718124 (version vs recommended)
+        if endpoint_id == "2718124":
+            # Check for recommended-specific formId
+            form_id = None
+            for f in payload.get("filters", []):
+                if f.get("field") == "formId":
+                    form_id = f.get("value")
+                    break
+            
+            if form_id == 2737553:
+                path = "academy/recommended"
+
         url = f"{base_path}/{path}"
         # Academy public endpoints are mostly GET
         method = "GET"

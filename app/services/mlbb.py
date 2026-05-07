@@ -65,23 +65,70 @@ def resolve_hero_id(hero_identifier: str, lang: str) -> int:
 def fetch_mlbb_post(endpoint_id: str, payload: dict[str, Any], lang: str) -> Any:
     # Mapping table for internal MLBB IDs to public endpoints
     mapping = {
-        "2756564": "heroes/positions",
-        "2756567": "heroes/rank",
+        "2756564": "heroes/positions", # Also used for list/detail/relation
+        "2756567": "heroes/rank", # Also used for detail_stats
         "2756568": "heroes/rank",
         "2756569": "heroes/rank",
         "2756565": "heroes/rank",
         "2756570": "heroes/rank",
+        "2756563": "heroes/{hero_id}",
+        "2674711": "heroes/{hero_id}/skill-combos",
+        "2674709": "heroes/{hero_id}/trends",
+        "2687909": "heroes/{hero_id}/trends",
+        "2690860": "heroes/{hero_id}/trends",
+        "2674710": "heroes/{hero_id}/counters",
     }
     
     base_path = BasePathProvider.get_base_path()
     
     if base_path.startswith("http"):
         # Bypass mode (full URL fallback)
+        # Extract hero_id from filters if present
+        hero_id = None
+        for f in payload.get("filters", []):
+            if f.get("field") in ["hero_id", "main_heroid"]:
+                hero_id = f.get("value")
+                break
+        
         path = mapping.get(endpoint_id, f"heroes/{endpoint_id}")
+        
+        # Differentiate overloaded ID 2756564
+        if endpoint_id == "2756564":
+            if hero_id:
+                # If fields contains name but no position fields, it's likely relations
+                fields = payload.get("fields", [])
+                if "hero.data.name" in fields and "hero.data.sortid" not in fields:
+                    path = "heroes/{hero_id}/relations"
+                else:
+                    path = "heroes/{hero_id}"
+            else:
+                # Check for position-specific filters
+                has_pos_filters = any(
+                    f.get("field") in ["<hero.data.sortid>", "<hero.data.roadsort>"] 
+                    for f in payload.get("filters", [])
+                )
+                path = "heroes/positions" if has_pos_filters else "heroes"
+        
+        # Differentiate overloaded ID 2756567
+        if endpoint_id == "2756567" and hero_id:
+            path = "heroes/{hero_id}/stats"
+
+        # Replace path parameters
+        if "{hero_id}" in path:
+            if hero_id:
+                path = path.format(hero_id=hero_id)
+            else:
+                # Try to get hero_id from other parts of payload or fallback
+                path = path.replace("{hero_id}", "0")
+                
         url = f"{base_path}/{path}"
         
         # Determine method and params
-        is_get = endpoint_id in ["2756564", "2756567", "2756568", "2756569", "2756565", "2756570"]
+        # All mapped endpoints in bypass mode are typically GET
+        is_get = endpoint_id in mapping or endpoint_id in [
+            "2756564", "2756567", "2756568", "2756569", "2756565", "2756570",
+            "2674711", "2674709", "2687909", "2690860", "2674710"
+        ]
         method = "GET" if is_get else "POST"
         
         params = {"lang": lang}
@@ -108,6 +155,8 @@ def fetch_mlbb_post(endpoint_id: str, payload: dict[str, Any], lang: str) -> Any
                 
                 if field == "bigrank":
                     params["rank"] = rank_reverse.get(str(value), value)
+                elif field == "past_days":
+                    params["days"] = value
                 elif "sortid" in field:
                     # Role filter
                     if isinstance(value, list):
