@@ -190,13 +190,29 @@ def fetch_academy_post(endpoint_id: str, payload: dict[str, Any], lang: str) -> 
 
 def fetch_ratings_all(lang: str) -> Any:
     base_path = BasePathProvider.get_base_path_ratings()
-    url = f"{RONE_DEV_ACCESS_KEY_V2}{base_path}?offset=0"
     headers = MLBBHeaderBuilder.get_academy_mlbb_header(lang, client_ip=get_bound_client_ip())
+    if base_path.startswith("http"):
+        return request_json(
+            method="GET",
+            url=base_path,
+            params={"lang": lang},
+            headers=headers,
+        )
+
+    url = f"{RONE_DEV_ACCESS_KEY_V2}{base_path}?offset=0"
     return request_json(method="GET", url=url, headers=headers)
 
 
 def fetch_ratings_subject(lang: str, subject: str) -> Any:
     base_path = BasePathProvider.get_base_path_ratings()
-    url = f"{RONE_DEV_ACCESS_KEY_V2}{base_path}/{subject}"
     headers = MLBBHeaderBuilder.get_academy_mlbb_header(lang, client_ip=get_bound_client_ip())
+    if base_path.startswith("http"):
+        return request_json(
+            method="GET",
+            url=f"{base_path}/{subject}",
+            params={"lang": lang},
+            headers=headers,
+        )
+
+    url = f"{RONE_DEV_ACCESS_KEY_V2}{base_path}/{subject}"
     return request_json(method="GET", url=url, headers=headers)

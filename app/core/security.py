@@ -59,7 +59,7 @@ class BasePathProvider:
     @classmethod
     def get_base_path_ratings(cls) -> str:
         decrypted = CryptoManager(SECRET_KEY).decrypt(cls.RONE_DEV_KEY_RATINGS)
-        return decrypted if decrypted else "https://openmlbb.fastapicloud.dev/api/ratings"
+        return decrypted if decrypted else "https://openmlbb.fastapicloud.dev/api/academy/heroes/ratings"
 
 
 class BaseUserPathProvider:
